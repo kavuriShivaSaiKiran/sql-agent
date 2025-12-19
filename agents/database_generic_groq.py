@@ -5,7 +5,7 @@ from langchain_groq import ChatGroq
 from langchain_community.utilities import SQLDatabase
 from langchain_community.agent_toolkits import create_sql_agent
 from urllib.parse import quote_plus
-from schema_metadata import table_metadata
+from schema_metadata import bike_store_metadata, bank_metadata
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 # Load environment variables
@@ -62,15 +62,28 @@ def get_agent():
     # No longer passing custom_table_info needed, we will inspect dynamically
     db = SQLDatabase.from_uri(db_uri)
 
-    # Dynamically fetch schema
-    # SQLDatabase automatically inspects the database to get table schemas
-    schema_description = db.get_table_info()
+    # Determine which metadata to use based on DB_NAME
+    dbname = os.getenv("DB_NAME", "")
+    metadata_map = {
+        "bike_store": bike_store_metadata,
+        "massive-bank": bank_metadata
+    }
+    
+    selected_metadata = metadata_map.get(dbname)
+    
+    if selected_metadata:
+        # Format curated metadata for system prompt
+        schema_description = f"Here is the Database Schema for {dbname} you must use:\n"
+        for table, description in selected_metadata.items():
+            schema_description += f"\nTable: {table}\n{description}\n"
+    else:
+        # Fallback to dynamic inspection
+        schema_description = f"Here is the schema of the database you are connected to:\n{db.get_table_info()}"
 
     # Custom Prompt Template
     # We explicitly tell Llama how to behave and where the schema is.
     system_prefix = f"""You are an expert Database Agent.
     
-    Here is the schema of the database you are connected to:
     {schema_description}
 
     CRITICAL RULES:

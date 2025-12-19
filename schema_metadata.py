@@ -1,4 +1,4 @@
-table_metadata = {
+bike_store_metadata = {
     "brands": """
     Stores brand information for bicycles.
     Columns:
@@ -91,5 +91,22 @@ table_metadata = {
     - active (Integer): 1 = Active, 0 = Inactive.
     - store_id (Integer): Store where staff works.
     - manager_id (Integer): Self-referencing FK to staffs (who is their manager).
+    """
+}
+
+bank_metadata = {
+    "transactions": """
+    Stores daily transaction summaries for the REC-SSEC Bank across various regions and domains.
+    Columns:
+    - Date (Date): The date on which the transactions took place.
+    - Domain (Text): The type of Business entity or sector where the transaction occurred (e.g., Retail, Tech).
+    - Location (Text): The city or region where the data was collected (e.g., Bhuj).
+    - Value (Decimal/Numeric): The total monetary value of all transactions for that day/domain/location (in INR).
+    - Count (Integer): The total number of transactions that occurred.
+    
+    Notes:
+    - This data is aggregated by Day + Domain + Location.
+    - 'Value' is the sum of transaction amounts.
+    - 'Count' is the number of transactions.
     """
 }
