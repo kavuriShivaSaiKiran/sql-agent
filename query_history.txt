@@ -229,3 +229,107 @@ WHERE st.store_name = 'Baldwin Bikes' AND c.category_name = 'Mountain Bikes'
 LIMIT 5;
 Answer: The **Baldwin Bikes** store currently has **877** Mountain Bikes in stock.
 --------------------------------------------------
+Timestamp: 2025-12-19 17:23:27.700515
+Question: can u get me the tables present in the current database
+SQL Query: No successful SQL Query generated
+Answer: The database contains a single table:
+
+**bankdataset**
+--------------------------------------------------
+Timestamp: 2025-12-19 17:23:46.530235
+Question: can u get the columns of the table
+SQL Query: No successful SQL Query generated
+Answer: The **bankdataset** table has the following columns:
+
+| Column Name        | Data Type                         |
+|--------------------|-----------------------------------|
+| Date               | TIMESTAMP WITHOUT TIME ZONE       |
+| Domain             | TEXT                              |
+| Location           | TEXT                              |
+| Value              | BIGINT                            |
+| Transaction_count | BIGINT                            |
+
+These are the exact columns available for querying in the table.
+--------------------------------------------------
+Timestamp: 2025-12-19 17:24:50.066185
+Question: can u get the top transactions in the month of Januray 2022
+SQL Query: SELECT * FROM bankdataset WHERE "Date" >= '2022-01-01' AND "Date" < '2022-02-01' ORDER BY "Transaction_count" DESC LIMIT 5;
+Answer: Here are the top 5 rows (by **Transaction_count**) for January 2022:
+
+| Date                | Domain        | Location   | Value   | Transaction_count |
+|---------------------|---------------|------------|---------|-------------------|
+| 2022‑01‑02 00:00:00 | RETAIL        | Hyderabad  | 666 429 | 2 548 |
+| 2022‑01‑01 00:00:00 | MEDICAL       | Konark     | 999 188 | 2 548 |
+| 2022‑01‑01 00:00:00 | INTERNATIONAL | Jaipur     | 600 366 | 2 548 |
+| 2022‑01‑02 00:00:00 | EDUCATION     | Goa        | 1 027 788 | 2 548 |
+| 2022‑01‑03 00:00:00 | EDUCATION     | Lucknow    | 1 055 268 | 2 548 |
+
+These rows are ordered by the highest **Transaction_count** for the month of January 2022 (limited to the top 5 as per the system rule).
+--------------------------------------------------
+Timestamp: 2025-12-19 17:25:38.387356
+Question: can u get the top transactions of Hyderabad in the year 2022 and also sort it by months
+SQL Query: SELECT "Date", "Domain", "Location", "Value", "Transaction_count" FROM bankdataset WHERE "Location" = 'Hyderabad' AND EXTRACT(YEAR FROM "Date")::int = 2022 ORDER BY EXTRACT(MONTH FROM "Date")::int, "Transaction_count" DESC LIMIT 5;
+Answer: **Top 5 transactions for Hyderabad in 2022 (sorted by month, then by highest transaction count within each month)**  
+
+| Date                | Domain    | Location  | Value   | Transaction_count |
+|---------------------|-----------|-----------|---------|-------------------|
+| 2022‑01‑02 00:00:00 | RETAIL    | Hyderabad | 666 429 | 2 548 |
+| 2022‑01‑30 00:00:00 | RETAIL    | Hyderabad | 473 335 | 2 548 |
+| 2022‑01‑19 00:00:00 | EDUCATION | Hyderabad | 998 810 | 2 545 |
+| 2022‑01‑29 00:00:00 | MEDICAL   | Hyderabad | 581 801 | 2 542 |
+| 2022‑01‑15 00:00:00 | MEDICAL   | Hyderabad | 538 635 | 2 541 |
+
+*All five rows fall in January 2022, which is why the month‑wise sorting shows only that month.*
+--------------------------------------------------
+Timestamp: 2025-12-19 17:25:52.493922
+Question: sorry I mean group it by months
+SQL Query: SELECT DATE_TRUNC('month', "Date") AS month,
+       SUM("Transaction_count") AS total_transactions,
+       SUM("Value") AS total_value
+FROM bankdataset
+WHERE "Location" = 'Hyderabad'
+  AND EXTRACT(YEAR FROM "Date") = 2022
+GROUP BY month
+ORDER BY month
+LIMIT 5;
+Answer: **Hyderabad – 2022 (transactions grouped by month)**  
+
+| Month (2022) | Total Transaction Count | Total Value |
+|--------------|------------------------|------------|
+| January      | 2 803 894 | 1 437 181 688 |
+| February     | 2 402 955 | 1 218 516 865 |
+| March        | 2 695 748 | 1 373 081 168 |
+| April        | 2 472 167 | 1 287 997 601 |
+| May          | 2 710 793 | 1 347 396 909 |
+
+*The data is aggregated per month, ordered chronologically, and limited to the first five months as required by the system rule.*
+--------------------------------------------------
+Timestamp: 2025-12-19 17:26:13.495858
+Question: in the above result what is transaction count and value ?
+SQL Query: No successful SQL Query generated
+Answer: **What the columns mean**
+
+| Column | Meaning |
+|--------|---------|
+| **Transaction Count** | The total number of individual banking transactions that occurred in Hyderabad during the given month. It is the sum of the `Transaction_count` field for all rows that belong to that month and location. |
+| **Value** | The total monetary amount (in whatever currency the dataset uses) of all those transactions. It is the sum of the `Value` field for the same set of rows. |
+
+So, for example, the row **January 2022 – Transaction Count = 2 803 894 – Value = 1 437 181 688** tells us that in January 2022 Hyderabad recorded **2,803,894** separate transactions whose combined monetary value was **1,437,181,688** (units). The same interpretation applies to the other months.
+--------------------------------------------------
+Timestamp: 2025-12-19 17:27:28.431147
+Question: can you also get me year wise transactions
+SQL Query: SELECT EXTRACT(YEAR FROM "Date") AS year,
+       SUM("Transaction_count") AS total_transaction_count,
+       SUM("Value") AS total_value
+FROM bankdataset
+GROUP BY year
+ORDER BY year ASC
+LIMIT 5;
+Answer: **Year‑wise transaction summary (limited to the first 5 years as required)**  
+
+| Year | Total Transaction Count | Total Value |
+|------|------------------------|------------|
+| 2022 | 1 480 410 311 | 753 207 112 952 |
+
+*The query summed the `Transaction_count` and `Value` columns for each year across the entire dataset and ordered the results chronologically.*
+--------------------------------------------------
